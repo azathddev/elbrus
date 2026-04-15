@@ -1,2 +1,4 @@
-github.com/sashabaranov/go-openai v1.41.2 h1:vfPRBZNMpnqu8ELsclWcAvF19lDNgh1t6TVfFFOPiSM=
-github.com/sashabaranov/go-openai v1.41.2/go.mod h1:lj5b/K+zjTSFxVLijLSTDZuP7adOgerWeFyZLUhAKRg=
+github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/tigusigalpa/gigachat-go v1.0.2 h1:38Jr19kk/RQtDo+7muM8s2xGPd/wEH7C1s4e2JJ5qlc=
+github.com/tigusigalpa/gigachat-go v1.0.2/go.mod h1:NgsTNcvyxPWzo/BN7v6/HQHWdiM7pEUlx9V+HkHE2rY=

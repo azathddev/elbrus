@@ -1,6 +1,6 @@
 # Сервис генерации рекламных баннеров на Go (с SDK)
 
-Пример проекта, где генерация изображений выполняется через Go SDK `github.com/sashabaranov/go-openai`, а не через ручные HTTP-запросы.
+Пример проекта, где генерация изображений выполняется через Go SDK `github.com/tigusigalpa/gigachat-go`, а не через ручные HTTP-запросы.
 
 ## Структура
 
@@ -14,14 +14,14 @@
    cd backend
    ```
 2. Заполните переменные окружения:
-   - `OPENAI_API_KEY` — ключ API (обязательно)
-   - `OPENAI_BASE_URL` — опционально, если нужен совместимый proxy/endpoint
-   - `OPENAI_IMAGE_MODEL` — по умолчанию `dall-e-3`
+   - `GIGACHAT_AUTH_KEY` — Base64 ключ (`ClientID:ClientSecret`) (обязательно, если не указаны `GIGACHAT_CLIENT_ID`/`GIGACHAT_CLIENT_SECRET`)
+   - `GIGACHAT_CLIENT_ID` + `GIGACHAT_CLIENT_SECRET` — альтернативный вариант, ключ соберется автоматически
+   - `GIGACHAT_IMAGE_MODEL` — по умолчанию `GigaChat-2-Max`
    - `PORT` — по умолчанию `8081`
 
 Пример для PowerShell:
 ```powershell
-$env:OPENAI_API_KEY="your_api_key"
+$env:GIGACHAT_AUTH_KEY="base64_clientid_colon_clientsecret"
 $env:PORT="8081"
 ```
 
@@ -62,7 +62,7 @@ Frontend отправляет запросы на:
   "result": {
     "imageUrl": "",
     "imageBase64": "iVBORw0KGgoAAA...",
-    "prompt": "Создай рекламный баннер..."
+    "prompt": "Нарисуй рекламный баннер..."
   }
 }
 ```
