@@ -1,9 +1,12 @@
 package main
 
 import (
+	"crypto/tls"
 	"log"
+	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	api "banner-generator/backend/internal/http"
@@ -11,9 +14,13 @@ import (
 )
 
 func main() {
-	token := os.Getenv("GIGACHAT_AUTH_TOKEN")
+	token := strings.TrimSpace(os.Getenv("GIGACHAT_AUTH_TOKEN"))
 	if token == "" {
-		log.Fatal("GIGACHAT_AUTH_TOKEN is required")
+		// Compatibility with SDK naming style.
+		token = strings.TrimSpace(os.Getenv("GIGACHAT_AUTH_KEY"))
+	}
+	if token == "" {
+		log.Fatal("GIGACHAT_AUTH_TOKEN (or GIGACHAT_AUTH_KEY) is required")
 	}
 
 	apiURL := os.Getenv("GIGACHAT_IMAGE_API_URL")
@@ -31,7 +38,24 @@ func main() {
 		port = "8080"
 	}
 
-	client := &http.Client{Timeout: 90 * time.Second}
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   20 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		TLSHandshakeTimeout:   30 * time.Second,
+		ResponseHeaderTimeout: 60 * time.Second,
+		ExpectContinueTimeout: 2 * time.Second,
+		IdleConnTimeout:       90 * time.Second,
+		MaxIdleConns:          100,
+		MaxIdleConnsPerHost:   10,
+		TLSClientConfig:       &tls.Config{MinVersion: tls.VersionTLS12},
+	}
+	client := &http.Client{
+		Timeout:   120 * time.Second,
+		Transport: transport,
+	}
 	generator := service.NewImageGenerator(client, apiURL, token, model)
 	handler := api.NewHandler(generator)
 

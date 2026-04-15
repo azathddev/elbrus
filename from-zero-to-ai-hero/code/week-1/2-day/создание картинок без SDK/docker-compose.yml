@@ -3,11 +3,17 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
     environment:
       PORT: "8080"
-      GIGACHAT_AUTH_TOKEN: ${GIGACHAT_AUTH_TOKEN}
+      GIGACHAT_AUTH_TOKEN: ${GIGACHAT_AUTH_TOKEN:-}
+      GIGACHAT_AUTH_KEY: ${GIGACHAT_AUTH_KEY:-}
       GIGACHAT_IMAGE_API_URL: ${GIGACHAT_IMAGE_API_URL:-https://gigachat.devices.sberbank.ru/api/v1/images/generations}
       GIGACHAT_IMAGE_MODEL: ${GIGACHAT_IMAGE_MODEL:-GigaChat-2-Max}
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-}
     restart: unless-stopped
 
   frontend:

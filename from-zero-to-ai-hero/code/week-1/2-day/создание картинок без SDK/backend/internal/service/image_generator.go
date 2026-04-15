@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type ImageGenerator struct {
@@ -60,7 +62,7 @@ func (g *ImageGenerator) Generate(ctx context.Context, req GenerateRequest) (Gen
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("Accept", "application/json")
 
-	resp, err := g.client.Do(httpReq)
+	resp, err := g.doWithRetry(httpReq, 3)
 	if err != nil {
 		return GenerateResult{}, fmt.Errorf("call image API: %w", err)
 	}
@@ -84,6 +86,46 @@ func (g *ImageGenerator) Generate(ctx context.Context, req GenerateRequest) (Gen
 	result.Prompt = prompt
 
 	return result, nil
+}
+
+func (g *ImageGenerator) doWithRetry(req *http.Request, attempts int) (*http.Response, error) {
+	var lastErr error
+	for i := 1; i <= attempts; i++ {
+		resp, err := g.client.Do(req)
+		if err == nil {
+			return resp, nil
+		}
+
+		lastErr = err
+		if !isRetryableTransportError(err) || i == attempts {
+			break
+		}
+
+		select {
+		case <-req.Context().Done():
+			return nil, req.Context().Err()
+		case <-time.After(time.Duration(i) * 800 * time.Millisecond):
+		}
+	}
+
+	return nil, lastErr
+}
+
+func isRetryableTransportError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	var netErr net.Error
+	if errors.As(err, &netErr) && (netErr.Timeout() || netErr.Temporary()) {
+		return true
+	}
+
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "tls handshake timeout") ||
+		strings.Contains(msg, "timeout") ||
+		strings.Contains(msg, "connection reset by peer") ||
+		strings.Contains(msg, "temporary failure")
 }
 
 func buildPrompt(message, audience string) string {
