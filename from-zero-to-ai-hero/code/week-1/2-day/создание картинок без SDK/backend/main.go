@@ -2,6 +2,8 @@ package main
 
 import (
 	"crypto/tls"
+	"crypto/x509"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -42,7 +44,12 @@ func main() {
 	if insecureSkipVerify {
 		log.Println("WARNING: GIGACHAT_INSECURE_SKIP_VERIFY=true disables TLS certificate verification")
 	}
+	customCAPath := strings.TrimSpace(os.Getenv("GIGACHAT_CA_CERT_PATH"))
 
+	tlsConfig, err := buildTLSConfig(insecureSkipVerify, customCAPath)
+	if err != nil {
+		log.Fatalf("configure TLS: %v", err)
+	}
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
@@ -55,10 +62,7 @@ func main() {
 		IdleConnTimeout:       90 * time.Second,
 		MaxIdleConns:          100,
 		MaxIdleConnsPerHost:   10,
-		TLSClientConfig: &tls.Config{
-			MinVersion:         tls.VersionTLS12,
-			InsecureSkipVerify: insecureSkipVerify,
-		},
+		TLSClientConfig:       tlsConfig,
 	}
 	client := &http.Client{
 		Timeout:   120 * time.Second,
@@ -71,4 +75,32 @@ func main() {
 	if err := http.ListenAndServe(":"+port, api.NewRouter(handler)); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func buildTLSConfig(insecureSkipVerify bool, customCAPath string) (*tls.Config, error) {
+	cfg := &tls.Config{
+		MinVersion:         tls.VersionTLS12,
+		InsecureSkipVerify: insecureSkipVerify,
+	}
+
+	if customCAPath == "" {
+		return cfg, nil
+	}
+
+	caPEM, err := os.ReadFile(customCAPath)
+	if err != nil {
+		return nil, fmt.Errorf("read custom CA file %q: %w", customCAPath, err)
+	}
+
+	roots, err := x509.SystemCertPool()
+	if err != nil || roots == nil {
+		roots = x509.NewCertPool()
+	}
+	if ok := roots.AppendCertsFromPEM(caPEM); !ok {
+		return nil, fmt.Errorf("failed to append certificates from %q", customCAPath)
+	}
+
+	cfg.RootCAs = roots
+	log.Printf("custom CA loaded from %s", customCAPath)
+	return cfg, nil
 }

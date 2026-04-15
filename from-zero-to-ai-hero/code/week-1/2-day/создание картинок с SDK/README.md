@@ -17,6 +17,8 @@
    - `GIGACHAT_AUTH_KEY` — Base64 ключ (`ClientID:ClientSecret`) (обязательно, если не указаны `GIGACHAT_CLIENT_ID`/`GIGACHAT_CLIENT_SECRET`)
    - `GIGACHAT_CLIENT_ID` + `GIGACHAT_CLIENT_SECRET` — альтернативный вариант, ключ соберется автоматически
    - `GIGACHAT_IMAGE_MODEL` — по умолчанию `GigaChat-2-Max`
+   - `GIGACHAT_CA_CERT_PATH` — путь к PEM сертификату корпоративного корневого CA (опционально)
+   - `GIGACHAT_INSECURE_SKIP_VERIFY` — `true/false`, отключение проверки TLS (только для dev)
    - `PORT` — по умолчанию `8081`
 
 Пример для PowerShell:

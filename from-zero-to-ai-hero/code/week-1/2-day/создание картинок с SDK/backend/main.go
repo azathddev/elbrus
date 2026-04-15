@@ -1,12 +1,17 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -35,11 +40,24 @@ func main() {
 	if port == "" {
 		port = "8081"
 	}
+	insecureSkipVerify, _ := strconv.ParseBool(strings.TrimSpace(os.Getenv("GIGACHAT_INSECURE_SKIP_VERIFY")))
+	customCAPath := strings.TrimSpace(os.Getenv("GIGACHAT_CA_CERT_PATH"))
+	httpClient, err := buildHTTPClient(insecureSkipVerify, customCAPath)
+	if err != nil {
+		log.Fatalf("configure TLS: %v", err)
+	}
+	if insecureSkipVerify {
+		log.Println("WARNING: GIGACHAT_INSECURE_SKIP_VERIFY=true disables TLS certificate verification")
+	}
 
-	tokenManager := gigachat.NewTokenManager(authKey)
+	tokenManager := gigachat.NewTokenManager(
+		authKey,
+		gigachat.WithTokenManagerHTTPClient(httpClient),
+	)
 	client := gigachat.NewClient(
 		tokenManager,
 		gigachat.WithDefaultModel(model),
+		gigachat.WithHTTPClient(httpClient),
 	)
 
 	mux := http.NewServeMux()
@@ -104,6 +122,49 @@ func main() {
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func buildHTTPClient(insecureSkipVerify bool, customCAPath string) (*http.Client, error) {
+	tlsConfig := &tls.Config{
+		MinVersion:         tls.VersionTLS12,
+		InsecureSkipVerify: insecureSkipVerify,
+	}
+
+	if customCAPath != "" {
+		caPEM, err := os.ReadFile(customCAPath)
+		if err != nil {
+			return nil, fmt.Errorf("read custom CA file %q: %w", customCAPath, err)
+		}
+		roots, err := x509.SystemCertPool()
+		if err != nil || roots == nil {
+			roots = x509.NewCertPool()
+		}
+		if ok := roots.AppendCertsFromPEM(caPEM); !ok {
+			return nil, fmt.Errorf("failed to append certificates from %q", customCAPath)
+		}
+		tlsConfig.RootCAs = roots
+		log.Printf("custom CA loaded from %s", customCAPath)
+	}
+
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   20 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		TLSHandshakeTimeout:   30 * time.Second,
+		ResponseHeaderTimeout: 60 * time.Second,
+		ExpectContinueTimeout: 2 * time.Second,
+		IdleConnTimeout:       90 * time.Second,
+		MaxIdleConns:          100,
+		MaxIdleConnsPerHost:   10,
+		TLSClientConfig:       tlsConfig,
+	}
+
+	return &http.Client{
+		Timeout:   120 * time.Second,
+		Transport: transport,
+	}, nil
 }
 
 func resolveAuthKey() string {
