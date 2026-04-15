@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Генератор рекламных баннеров</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Генератор рекламных баннеров</h1>
+
+      <section class="controls">
+        <div class="inputRow">
+          <textarea
+            id="messageInput"
+            class="messageInput"
+            placeholder="Введите рекламное сообщение..."
+            rows="4"
+          ></textarea>
+          <button id="generateBtn" class="generateBtn">Отправить</button>
+        </div>
+
+        <label class="audienceLabel" for="audienceSelect">Аудитория:</label>
+        <select id="audienceSelect" class="audienceSelect">
+          <option value="Широкая аудитория">Широкая аудитория</option>
+          <option value="Студенты">Студенты</option>
+          <option value="Предприниматели">Предприниматели</option>
+          <option value="Молодые родители">Молодые родители</option>
+          <option value="IT-специалисты">IT-специалисты</option>
+        </select>
+      </section>
+
+      <p id="statusText" class="statusText"></p>
+
+      <section>
+        <h2>Сгенерированные изображения</h2>
+        <div id="gallery" class="gallery"></div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,127 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f7f7fb;
+  color: #202124;
+}
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+h1 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.controls {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.inputRow {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.messageInput {
+  flex: 1;
+  resize: vertical;
+  min-height: 120px;
+  border-radius: 10px;
+  border: 1px solid #d2d2df;
+  padding: 12px;
+  font-size: 16px;
+}
+
+.generateBtn {
+  width: 140px;
+  border: none;
+  border-radius: 10px;
+  background: #1c6bff;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.generateBtn:disabled {
+  background: #9bb9ff;
+  cursor: not-allowed;
+}
+
+.audienceLabel {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
+.audienceSelect {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #d2d2df;
+  padding: 10px;
+  background: #fff;
+}
+
+.statusText {
+  min-height: 22px;
+  margin: 12px 0;
+  color: #175d15;
+}
+
+.statusText.error {
+  color: #c1272d;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.placeholder {
+  color: #60646f;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
+.cardMeta {
+  padding: 10px 12px;
+}
+
+.cardMeta p {
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+@media (max-width: 720px) {
+  .inputRow {
+    flex-direction: column;
+  }
+
+  .generateBtn {
+    width: 100%;
+    min-height: 44px;
+  }
+}
