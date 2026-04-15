@@ -96,11 +96,29 @@ func buildTLSConfig(insecureSkipVerify bool, customCAPath string) (*tls.Config, 
 	if err != nil || roots == nil {
 		roots = x509.NewCertPool()
 	}
-	if ok := roots.AppendCertsFromPEM(caPEM); !ok {
-		return nil, fmt.Errorf("failed to append certificates from %q", customCAPath)
+	if err := appendCustomCA(roots, caPEM, customCAPath); err != nil {
+		return nil, err
 	}
 
 	cfg.RootCAs = roots
 	log.Printf("custom CA loaded from %s", customCAPath)
 	return cfg, nil
+}
+
+func appendCustomCA(pool *x509.CertPool, certData []byte, sourcePath string) error {
+	if ok := pool.AppendCertsFromPEM(certData); ok {
+		return nil
+	}
+
+	cert, err := x509.ParseCertificate(certData)
+	if err == nil {
+		pool.AddCert(cert)
+		return nil
+	}
+
+	return fmt.Errorf(
+		"failed to parse CA certificate %q as PEM or DER: %w",
+		sourcePath,
+		err,
+	)
 }
