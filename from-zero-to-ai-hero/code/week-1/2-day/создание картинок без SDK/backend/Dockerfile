@@ -8,6 +8,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/banner-api .
 
 FROM alpine:3.20
+RUN apk add --no-cache ca-certificates && update-ca-certificates
 RUN adduser -D -g '' appuser
 
 WORKDIR /app

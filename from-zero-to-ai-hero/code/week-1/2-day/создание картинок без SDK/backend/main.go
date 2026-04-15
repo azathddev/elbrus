@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -37,6 +38,10 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+	insecureSkipVerify, _ := strconv.ParseBool(strings.TrimSpace(os.Getenv("GIGACHAT_INSECURE_SKIP_VERIFY")))
+	if insecureSkipVerify {
+		log.Println("WARNING: GIGACHAT_INSECURE_SKIP_VERIFY=true disables TLS certificate verification")
+	}
 
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
@@ -50,7 +55,10 @@ func main() {
 		IdleConnTimeout:       90 * time.Second,
 		MaxIdleConns:          100,
 		MaxIdleConnsPerHost:   10,
-		TLSClientConfig:       &tls.Config{MinVersion: tls.VersionTLS12},
+		TLSClientConfig: &tls.Config{
+			MinVersion:         tls.VersionTLS12,
+			InsecureSkipVerify: insecureSkipVerify,
+		},
 	}
 	client := &http.Client{
 		Timeout:   120 * time.Second,

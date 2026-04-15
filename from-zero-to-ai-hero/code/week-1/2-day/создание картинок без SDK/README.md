@@ -29,6 +29,7 @@
 Опционально:
 - `GIGACHAT_IMAGE_API_URL` — URL API генерации изображений;
 - `GIGACHAT_IMAGE_MODEL` — модель генерации.
+- `GIGACHAT_INSECURE_SKIP_VERIFY` — `true/false`, отключение TLS-проверки сертификата (только для dev).
 
 ## Запуск backend
 
@@ -60,6 +61,9 @@ curl http://localhost:8080/health
    cp .env.example .env
    ```
 2. Заполните `GIGACHAT_AUTH_TOKEN` в `.env`.
+   - если в сети подменяется TLS-сертификат (корпоративный прокси), временно можно выставить:
+     - `GIGACHAT_INSECURE_SKIP_VERIFY=true`
+   - для production оставляйте `false` и установите корректные корневые сертификаты.
 3. Запустите контейнеры:
    ```bash
    docker compose up --build

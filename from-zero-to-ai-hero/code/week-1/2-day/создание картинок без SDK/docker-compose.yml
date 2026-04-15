@@ -11,6 +11,7 @@ services:
       GIGACHAT_AUTH_KEY: ${GIGACHAT_AUTH_KEY:-}
       GIGACHAT_IMAGE_API_URL: ${GIGACHAT_IMAGE_API_URL:-https://gigachat.devices.sberbank.ru/api/v1/images/generations}
       GIGACHAT_IMAGE_MODEL: ${GIGACHAT_IMAGE_MODEL:-GigaChat-2-Max}
+      GIGACHAT_INSECURE_SKIP_VERIFY: ${GIGACHAT_INSECURE_SKIP_VERIFY:-false}
       HTTP_PROXY: ${HTTP_PROXY:-}
       HTTPS_PROXY: ${HTTPS_PROXY:-}
       NO_PROXY: ${NO_PROXY:-}
